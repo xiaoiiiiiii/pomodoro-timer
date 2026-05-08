@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>番茄钟</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" data-tab="timer">计时</button>
+        <button class="tab" data-tab="tasks">任务</button>
+        <button class="tab" data-tab="history">历史</button>
+      </div>
+
+      <!-- Timer Tab -->
+      <div class="tab-content active" id="tab-timer">
+        <div class="mode-indicator" id="modeIndicator">工作中</div>
+        <div class="timer-display" id="timerDisplay">25:00</div>
+        <div class="cycle-info" id="cycleInfo">第 0 / 4 轮</div>
+
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="controls">
+          <button class="btn btn-primary" id="btnStart">开始</button>
+          <button class="btn btn-secondary" id="btnPause" disabled>暂停</button>
+          <button class="btn btn-secondary" id="btnReset">重置</button>
+          <button class="btn btn-small" id="btnSkip">跳过</button>
+        </div>
+
+        <div class="duration-settings">
+          <div class="setting-row">
+            <label>工作时间（分钟）</label>
+            <input type="number" id="workDuration" value="25" min="1" max="120" />
+          </div>
+          <div class="setting-row">
+            <label>短休息（分钟）</label>
+            <input type="number" id="shortBreakDuration" value="5" min="1" max="60" />
+          </div>
+          <div class="setting-row">
+            <label>长休息（分钟）</label>
+            <input type="number" id="longBreakDuration" value="15" min="1" max="60" />
+          </div>
+          <div class="setting-row">
+            <label>长休息间隔（轮）</label>
+            <input type="number" id="longBreakInterval" value="4" min="1" max="10" />
+          </div>
+        </div>
+
+        <div class="options">
+          <label class="checkbox-label">
+            <input type="checkbox" id="alwaysOnTop" checked /> 窗口置顶
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="soundEnabled" checked /> 提示音
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="notificationEnabled" checked /> 桌面通知
+          </label>
+        </div>
+
+        <div class="close-behavior-section">
+          <div class="section-label">关闭按钮行为</div>
+          <div class="close-behavior-row">
+            <select id="closeActionSelect">
+              <option value="">每次询问</option>
+              <option value="tray">最小化到托盘</option>
+              <option value="quit">直接退出程序</option>
+            </select>
+            <button class="btn btn-small" id="btnResetCloseAction">恢复询问</button>
+          </div>
+          <div class="close-hint" id="closeHint"></div>
+        </div>
+      </div>
+
+      <!-- Tasks Tab -->
+      <div class="tab-content" id="tab-tasks">
+        <div class="task-input-row">
+          <input type="text" id="taskInput" placeholder="添加任务..." maxlength="200" />
+          <button class="btn btn-primary" id="btnAddTask">添加</button>
+        </div>
+        <div class="task-filters">
+          <button class="filter-btn active" data-filter="all">全部</button>
+          <button class="filter-btn" data-filter="active">进行中</button>
+          <button class="filter-btn" data-filter="done">已完成</button>
+        </div>
+        <ul class="task-list" id="taskList"></ul>
+        <div class="task-actions" id="taskActions" style="display: none">
+          <button class="btn btn-small btn-danger" id="btnClearDone">清除已完成</button>
+        </div>
+      </div>
+
+      <!-- History Tab -->
+      <div class="tab-content" id="tab-history">
+        <div class="history-stats" id="historyStats"></div>
+        <div class="history-list" id="historyList"></div>
+        <button class="btn btn-small btn-danger" id="btnClearHistory">清除历史</button>
+      </div>
+    </div>
+
+    <audio id="alarmSound" preload="auto">
+      <source
+        src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACAf39/f4B/f3+AgH9/gH9/f4CAf39/gIB/f3+AgH9/gH9/f4CAf3+AgIB/f3+AgH9/gH9/f4B/f3+AgH9/gH9/f4CAf39/gIB/f3+AgH9/gH9/f4B/f39/gH9/f4CAf39/gH9/f4B/f39/gH9/f4CAf3+AgH9/f4B/f39/gH9/f4CAf39/gH9/f4B/f39/gH9/f4CAf39/gH9/f4B/f39/gH9/f4B/f39/gH9/f4CAf3+AgH9/f4B/f39/gH9/f4CAf39/gH9/f4B/f39/gH9/f4CAf39/gH9/f4B/f39/gH9/f4B/f39/gH9/f4CAf3+AgH9/f4B/f39/gH9/f4B/f3+AgH9/gH9/f4CAf39/gH9/f4B/f39/gH9/f4B/f3+AgH9/gH9/f4CAf39/gIB/f3+AgH9/gH9/f4B/f3+AgH9/gH9/f4B/f3+AgH9/gH9/f4CAf3+AgH9/f4B/f39/gH9/f4B/f3+AgH9/gH9/f4B/f39/gH9/f4B/f3+AgH9/gH9/f4B/f3+AgH9/gH9/f4CAf39/gH9/f4B/f3+AgH9/gH9/f4B/f3+AgH9/gH9/f4B/f3+AgH9/gH9/f4B/f39/gH9/f4B/f39/gH9/f4B/f39/gH9/f4B/f39/gH9/f4B/f3+AgH9/gH9/f4B/f39/gH9/f4B/f39/gH9/f4AA=="
+        type="audio/wav"
+      />
+    </audio>
+
+    <script src="timer-logic.js"></script>
+    <script src="renderer.js"></script>
+  </body>
+</html>
