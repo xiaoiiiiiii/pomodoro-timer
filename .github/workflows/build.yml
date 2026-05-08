@@ -37,7 +37,7 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
-      - run: npm run build
+      - run: npm run build -- --publish never
       - uses: actions/upload-artifact@v4
         with:
           name: pomodoro-installer
